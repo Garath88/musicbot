@@ -40,27 +40,27 @@ import net.dv8tion.jda.core.exceptions.PermissionException;
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class PlayCmd extends MusicCommand
+public class PlayLastCmd extends MusicCommand
 {
     private final static String LOAD = "\uD83D\uDCE5"; // 📥
     private final static String CANCEL = "\uD83D\uDEAB"; // 🚫
-    
+
     private final String loadingEmoji;
-    
-    public PlayCmd(Bot bot, String loadingEmoji)
+
+    public PlayLastCmd(Bot bot, String loadingEmoji)
     {
         super(bot);
         this.loadingEmoji = loadingEmoji;
-        this.name = "play";
+        this.name = "playlast";
         this.arguments = "<title|URL|subcommand>";
-        this.help = "plays the provided song";
+        this.help = "add the provided song at the end of the queue";
         this.beListening = true;
         this.bePlaying = false;
         this.children = new Command[]{new PlaylistCmd(bot)};
     }
 
     @Override
-    public void doCommand(CommandEvent event) 
+    public void doCommand(CommandEvent event)
     {
         if(event.getArgs().isEmpty() && event.getMessage().getAttachments().isEmpty())
         {
@@ -91,25 +91,25 @@ public class PlayCmd extends MusicCommand
             event.reply(builder.toString());
             return;
         }
-        String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">") 
-                ? event.getArgs().substring(1,event.getArgs().length()-1) 
+        String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">")
+                ? event.getArgs().substring(1,event.getArgs().length()-1)
                 : event.getArgs().isEmpty() ? event.getMessage().getAttachments().get(0).getUrl() : event.getArgs();
         event.reply(loadingEmoji+" Loading... `["+args+"]`", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m,event,false)));
     }
-    
+
     private class ResultHandler implements AudioLoadResultHandler
     {
         private final Message m;
         private final CommandEvent event;
         private final boolean ytsearch;
-        
+
         private ResultHandler(Message m, CommandEvent event, boolean ytsearch)
         {
             this.m = m;
             this.event = event;
             this.ytsearch = ytsearch;
         }
-        
+
         private void loadSingle(AudioTrack track, AudioPlaylist playlist)
         {
             if(bot.getConfig().isTooLong(track))
@@ -143,7 +143,7 @@ public class PlayCmd extends MusicCommand
                         }).build().display(m);
             }
         }
-        
+
         private int loadPlaylist(AudioPlaylist playlist, AudioTrack exclude)
         {
             int[] count = {0};
@@ -157,7 +157,7 @@ public class PlayCmd extends MusicCommand
             });
             return count[0];
         }
-        
+
         @Override
         public void trackLoaded(AudioTrack track)
         {
@@ -214,7 +214,7 @@ public class PlayCmd extends MusicCommand
                 m.editMessage(event.getClient().getError()+" Error loading track.").queue();
         }
     }
-    
+
     public class PlaylistCmd extends MusicCommand
     {
         public PlaylistCmd(Bot bot)
@@ -229,7 +229,7 @@ public class PlayCmd extends MusicCommand
         }
 
         @Override
-        public void doCommand(CommandEvent event) 
+        public void doCommand(CommandEvent event)
         {
             if(event.getArgs().isEmpty())
             {
@@ -242,12 +242,12 @@ public class PlayCmd extends MusicCommand
                 event.replyError("I could not find `"+event.getArgs()+".txt` in the Playlists folder.");
                 return;
             }
-            event.getChannel().sendMessage(loadingEmoji+" Loading playlist **"+event.getArgs()+"**... ("+playlist.getItems().size()+" items)").queue(m -> 
+            event.getChannel().sendMessage(loadingEmoji+" Loading playlist **"+event.getArgs()+"**... ("+playlist.getItems().size()+" items)").queue(m ->
             {
                 AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
                 playlist.loadTracks(bot.getPlayerManager(), (at)->handler.addTrack(new QueuedTrack(at, event.getAuthor())), () -> {
-                    StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty() 
-                            ? event.getClient().getWarning()+" No tracks were loaded!" 
+                    StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty()
+                            ? event.getClient().getWarning()+" No tracks were loaded!"
                             : event.getClient().getSuccess()+" Loaded **"+playlist.getTracks().size()+"** tracks!");
                     if(!playlist.getErrors().isEmpty())
                         builder.append("\nThe following tracks failed to load:");

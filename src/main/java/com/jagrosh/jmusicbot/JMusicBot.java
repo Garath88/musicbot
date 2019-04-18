@@ -15,181 +15,200 @@
  */
 package com.jagrosh.jmusicbot;
 
+import java.awt.Color;
+
+import javax.security.auth.login.LoginException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.jagrosh.jdautilities.examples.command.*;
-import com.jagrosh.jmusicbot.commands.admin.*;
-import com.jagrosh.jmusicbot.commands.dj.*;
-import com.jagrosh.jmusicbot.commands.general.*;
-import com.jagrosh.jmusicbot.commands.music.*;
-import com.jagrosh.jmusicbot.commands.owner.*;
+import com.jagrosh.jdautilities.examples.command.AboutCommand;
+import com.jagrosh.jdautilities.examples.command.PingCommand;
+import com.jagrosh.jmusicbot.commands.admin.SetdjCmd;
+import com.jagrosh.jmusicbot.commands.admin.SettcCmd;
+import com.jagrosh.jmusicbot.commands.admin.SetvcCmd;
+import com.jagrosh.jmusicbot.commands.dj.ForceskipCmd;
+import com.jagrosh.jmusicbot.commands.dj.PauseCmd;
+import com.jagrosh.jmusicbot.commands.dj.PlayCmd;
+import com.jagrosh.jmusicbot.commands.dj.RepeatCmd;
+import com.jagrosh.jmusicbot.commands.dj.SkiptoCmd;
+import com.jagrosh.jmusicbot.commands.dj.StopCmd;
+import com.jagrosh.jmusicbot.commands.dj.VolumeCmd;
+import com.jagrosh.jmusicbot.commands.general.SettingsCmd;
+import com.jagrosh.jmusicbot.commands.music.LyricsCmd;
+import com.jagrosh.jmusicbot.commands.music.NowplayingCmd;
+import com.jagrosh.jmusicbot.commands.music.PlayLastCmd;
+import com.jagrosh.jmusicbot.commands.music.PlaylistsCmd;
+import com.jagrosh.jmusicbot.commands.music.QueueCmd;
+import com.jagrosh.jmusicbot.commands.music.RemoveCmd;
+import com.jagrosh.jmusicbot.commands.music.SCSearchCmd;
+import com.jagrosh.jmusicbot.commands.music.SearchCmd;
+import com.jagrosh.jmusicbot.commands.music.ShuffleCmd;
+import com.jagrosh.jmusicbot.commands.music.SkipCmd;
+import com.jagrosh.jmusicbot.commands.owner.AutoplaylistCmd;
+import com.jagrosh.jmusicbot.commands.owner.EvalCmd;
+import com.jagrosh.jmusicbot.commands.owner.PlaylistCmd;
+import com.jagrosh.jmusicbot.commands.owner.SetavatarCmd;
+import com.jagrosh.jmusicbot.commands.owner.SetgameCmd;
+import com.jagrosh.jmusicbot.commands.owner.SetnameCmd;
+import com.jagrosh.jmusicbot.commands.owner.SetstatusCmd;
+import com.jagrosh.jmusicbot.commands.owner.ShutdownCmd;
 import com.jagrosh.jmusicbot.entities.Prompt;
 import com.jagrosh.jmusicbot.gui.GUI;
 import com.jagrosh.jmusicbot.settings.SettingsManager;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
-import java.awt.Color;
-import javax.security.auth.login.LoginException;
-import net.dv8tion.jda.core.*;
+
+import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Game;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author John Grosh (jagrosh)
  */
-public class JMusicBot 
-{
-    public final static String PLAY_EMOJI  = "\u25B6"; // ▶
-    public final static String PAUSE_EMOJI = "\u23F8"; // ⏸
-    public final static String STOP_EMOJI  = "\u23F9"; // ⏹
-    public final static Permission[] RECOMMENDED_PERMS = new Permission[]{Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_HISTORY, Permission.MESSAGE_ADD_REACTION,
-                                Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ATTACH_FILES, Permission.MESSAGE_MANAGE, Permission.MESSAGE_EXT_EMOJI,
-                                Permission.MANAGE_CHANNEL, Permission.VOICE_CONNECT, Permission.VOICE_SPEAK, Permission.NICKNAME_CHANGE};
+public class JMusicBot {
+    public static final String PLAY_EMOJI = "\u25B6"; // ▶
+    public static final String PAUSE_EMOJI = "\u23F8"; // ⏸
+    public static final String STOP_EMOJI = "\u23F9"; // ⏹
+    static final Permission[] RECOMMENDED_PERMS = new Permission[] { Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_HISTORY, Permission.MESSAGE_ADD_REACTION,
+        Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ATTACH_FILES, Permission.MESSAGE_MANAGE, Permission.MESSAGE_EXT_EMOJI,
+        Permission.MANAGE_CHANNEL, Permission.VOICE_CONNECT, Permission.VOICE_SPEAK, Permission.NICKNAME_CHANGE };
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         // startup log
         Logger log = LoggerFactory.getLogger("Startup");
-        
+
         // create prompt to handle startup
-        Prompt prompt = new Prompt("JMusicBot", "Switching to nogui mode. You can manually start in nogui mode by including the -Dnogui=true flag.", 
-                "true".equalsIgnoreCase(System.getProperty("nogui", "false")));
-        
+        Prompt prompt = new Prompt("JMusicBot", "Switching to nogui mode. You can manually start in nogui mode by including the -Dnogui=true flag.",
+            "true".equalsIgnoreCase(System.getProperty("nogui", "false")));
+
         // check deprecated nogui mode (new way of setting it is -Dnogui=true)
-        for(String arg: args)
-            if("-nogui".equalsIgnoreCase(arg))
-            {
+        for (String arg : args)
+            if ("-nogui".equalsIgnoreCase(arg)) {
                 prompt.alert(Prompt.Level.WARNING, "GUI", "The -nogui flag has been deprecated. "
-                        + "Please use the -Dnogui=true flag before the name of the jar. Example: java -jar -Dnogui=true JMusicBot.jar");
+                    + "Please use the -Dnogui=true flag before the name of the jar. Example: java -jar -Dnogui=true JMusicBot.jar");
                 break;
             }
-        
+
         // get and check latest version
         String version = OtherUtil.checkVersion(prompt);
-        
+
         // load config
         BotConfig config = new BotConfig(prompt);
         config.load();
-        if(!config.isValid())
+        if (!config.isValid())
             return;
-        
+
         // set up the listener
         EventWaiter waiter = new EventWaiter();
         SettingsManager settings = new SettingsManager();
         Bot bot = new Bot(waiter, config, settings);
-        
+
         AboutCommand aboutCommand = new AboutCommand(Color.BLUE.brighter(),
-                                "a music bot that is [easy to host yourself!](https://github.com/jagrosh/MusicBot) (v"+version+")",
-                                new String[]{"High-quality music playback", "FairQueue™ Technology", "Easy to host yourself"},
-                                RECOMMENDED_PERMS);
+            "a music bot that is [easy to host yourself!](https://github.com/jagrosh/MusicBot) (v" + version + ")",
+            new String[] { "High-quality music playback", "FairQueue™ Technology", "Easy to host yourself" },
+            RECOMMENDED_PERMS);
         aboutCommand.setIsAuthor(false);
         aboutCommand.setReplacementCharacter("\uD83C\uDFB6"); // 🎶
-        
+
         // set up the command client
         CommandClientBuilder cb = new CommandClientBuilder()
-                .setPrefix(config.getPrefix())
-                .setAlternativePrefix(config.getAltPrefix())
-                .setOwnerId(Long.toString(config.getOwnerId()))
-                .setEmojis(config.getSuccess(), config.getWarning(), config.getError())
-                .setHelpWord(config.getHelp())
-                .setLinkedCacheSize(200)
-                .setGuildSettingsManager(settings)
-                .addCommands(aboutCommand,
-                        new PingCommand(),
-                        new SettingsCmd(),
-                        
-                        new LyricsCmd(bot),
-                        new NowplayingCmd(bot),
-                        new PlayCmd(bot, config.getLoading()),
-                        new PlaylistsCmd(bot),
-                        new QueueCmd(bot),
-                        new RemoveCmd(bot),
-                        new SearchCmd(bot, config.getSearching()),
-                        new SCSearchCmd(bot, config.getSearching()),
-                        new ShuffleCmd(bot),
-                        new SkipCmd(bot),
-                        
-                        new ForceskipCmd(bot),
-                        new PauseCmd(bot),
-                        new PlaynextCmd(bot, config.getLoading()),
-                        new RepeatCmd(bot),
-                        new SkiptoCmd(bot),
-                        new StopCmd(bot),
-                        new VolumeCmd(bot),
-                        
-                        new SetdjCmd(),
-                        new SettcCmd(),
-                        new SetvcCmd(),
-                        
-                        new AutoplaylistCmd(bot),
-                        new PlaylistCmd(bot),
-                        new SetavatarCmd(),
-                        new SetgameCmd(),
-                        new SetnameCmd(),
-                        new SetstatusCmd(),
-                        new ShutdownCmd(bot)
-                );
-        if(config.useEval())
+            .setPrefix(config.getPrefix())
+            .setAlternativePrefix(config.getAltPrefix())
+            .setOwnerId(Long.toString(config.getOwnerId()))
+            .setEmojis(config.getSuccess(), config.getWarning(), config.getError())
+            .setHelpWord(config.getHelp())
+            .setLinkedCacheSize(200)
+            .setGuildSettingsManager(settings)
+            .addCommands(aboutCommand,
+                new PingCommand(),
+                new SettingsCmd(),
+
+                new LyricsCmd(bot),
+                new NowplayingCmd(bot),
+                new PlayLastCmd(bot, config.getLoading()),
+                new PlaylistsCmd(bot),
+                new QueueCmd(bot),
+                new RemoveCmd(bot),
+                new SearchCmd(bot, config.getSearching()),
+                new SCSearchCmd(bot, config.getSearching()),
+                new ShuffleCmd(bot),
+                new SkipCmd(bot),
+
+                new ForceskipCmd(bot),
+                new PauseCmd(bot),
+                new PlayCmd(bot, config.getLoading()),
+                new RepeatCmd(bot),
+                new SkiptoCmd(bot),
+                new StopCmd(bot),
+                new VolumeCmd(bot),
+
+                new SetdjCmd(),
+                new SettcCmd(),
+                new SetvcCmd(),
+
+                new AutoplaylistCmd(bot),
+                new PlaylistCmd(bot),
+                new SetavatarCmd(),
+                new SetgameCmd(),
+                new SetnameCmd(),
+                new SetstatusCmd(),
+                new ShutdownCmd(bot)
+            );
+        if (config.useEval())
             cb.addCommand(new EvalCmd(bot));
         boolean nogame = false;
-        if(config.getStatus()!=OnlineStatus.UNKNOWN)
+        if (config.getStatus() != OnlineStatus.UNKNOWN)
             cb.setStatus(config.getStatus());
-        if(config.getGame()==null)
+        if (config.getGame() == null)
             cb.useDefaultGame();
-        else if(config.getGame().getName().equalsIgnoreCase("none"))
-        {
+        else if (config.getGame().getName().equalsIgnoreCase("none")) {
             cb.setGame(null);
             nogame = true;
-        }
-        else
+        } else
             cb.setGame(config.getGame());
         CommandClient client = cb.build();
-        
-        if(!prompt.isNoGUI())
-        {
-            try 
-            {
+
+        if (!prompt.isNoGUI()) {
+            try {
                 GUI gui = new GUI(bot);
                 bot.setGUI(gui);
                 gui.init();
-            } 
-            catch(Exception e) 
-            {
+            } catch (Exception e) {
                 log.error("Could not start GUI. If you are "
-                        + "running on a server or in a location where you cannot display a "
-                        + "window, please run in nogui mode using the -Dnogui=true flag.");
+                    + "running on a server or in a location where you cannot display a "
+                    + "window, please run in nogui mode using the -Dnogui=true flag.");
             }
         }
-        
-        log.info("Loaded config from "+config.getConfigLocation());
-        
+
+        log.info("Loaded config from " + config.getConfigLocation());
+
         // attempt to log in and start
-        try
-        {
+        try {
             JDA jda = new JDABuilder(AccountType.BOT)
-                    .setToken(config.getToken())
-                    .setAudioEnabled(true)
-                    .setGame(nogame ? null : Game.playing("loading..."))
-                    .setStatus(config.getStatus()==OnlineStatus.INVISIBLE||config.getStatus()==OnlineStatus.OFFLINE ? OnlineStatus.INVISIBLE : OnlineStatus.DO_NOT_DISTURB)
-                    .addEventListener(client, waiter, new Listener(bot))
-                    .setBulkDeleteSplittingEnabled(true)
-                    .build();
+                .setToken(config.getToken())
+                .setAudioEnabled(true)
+                .setGame(nogame ? null : Game.playing("loading..."))
+                .setStatus(config.getStatus() == OnlineStatus.INVISIBLE || config.getStatus() == OnlineStatus.OFFLINE ? OnlineStatus.INVISIBLE : OnlineStatus.DO_NOT_DISTURB)
+                .addEventListener(client, waiter, new Listener(bot))
+                .setBulkDeleteSplittingEnabled(true)
+                .build();
             bot.setJDA(jda);
-        }
-        catch (LoginException ex)
-        {
-            log.error(ex+"\nPlease make sure you are "
-                    + "editing the correct config.txt file, and that you have used the "
-                    + "correct token (not the 'secret'!)");
+        } catch (LoginException ex) {
+            log.error(ex + "\nPlease make sure you are "
+                + "editing the correct config.txt file, and that you have used the "
+                + "correct token (not the 'secret'!)");
             System.exit(1);
-        }
-        catch(IllegalArgumentException ex)
-        {
-            log.error("Some aspect of the configuration is invalid: "+ex);
+        } catch (IllegalArgumentException ex) {
+            log.error("Some aspect of the configuration is invalid: " + ex);
             System.exit(1);
         }
     }

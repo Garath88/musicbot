@@ -15,19 +15,25 @@
  */
 package com.jagrosh.jmusicbot.utils;
 
-import com.jagrosh.jmusicbot.JMusicBot;
-import com.jagrosh.jmusicbot.entities.Prompt;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
-import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.entities.Game;
-import okhttp3.*;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import com.jagrosh.jmusicbot.JMusicBot;
+import com.jagrosh.jmusicbot.entities.Prompt;
+
+import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.entities.Game;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 /**
  *
@@ -97,7 +103,7 @@ public class OtherUtil
         
         if(latestVersion!=null && !latestVersion.equals(version))
         {
-            prompt.alert(Prompt.Level.WARNING, "Version", String.format(NEW_VERSION_AVAILABLE, version, latestVersion));
+            //prompt.alert(Prompt.Level.WARNING, "Version", String.format(NEW_VERSION_AVAILABLE, version, latestVersion));
         }
         
         // Return the current version

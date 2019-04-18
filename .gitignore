@@ -4,3 +4,6 @@
 *.json
 *.txt
 nb*.xml
+/.idea/
+/src/main/resources/reference.conf
+/JMusicBot.iml

@@ -19,30 +19,28 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.DJCommand;
+import com.jagrosh.jmusicbot.utils.QueueUtil;
+
 import net.dv8tion.jda.core.entities.User;
 
 /**
- *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class ForceskipCmd extends DJCommand 
-{
-    public ForceskipCmd(Bot bot)
-    {
+public class ForceskipCmd extends DJCommand {
+    public ForceskipCmd(Bot bot) {
         super(bot);
         this.name = "forceskip";
         this.help = "skips the current song";
-        this.aliases = new String[]{"modskip"};
+        this.aliases = new String[] { "modskip", "fs" };
         this.bePlaying = true;
     }
 
     @Override
-    public void doCommand(CommandEvent event) 
-    {
+    public void doCommand(CommandEvent event) {
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
         User u = event.getJDA().getUserById(handler.getRequester());
-        event.reply(event.getClient().getSuccess()+" Skipped **"+handler.getPlayer().getPlayingTrack().getInfo().title
-                +"** (requested by "+(u==null ? "someone" : "**"+u.getName()+"**")+")");
-        handler.getPlayer().stopTrack();
+        event.reply(event.getClient().getSuccess() + " Skipped **" + handler.getPlayer().getPlayingTrack().getInfo().title
+            + "** (requested by " + (u == null ? "someone" : "**" + u.getName() + "**") + ")");
+        QueueUtil.skipTrack(handler);
     }
 }
