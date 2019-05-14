@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jagrosh.jmusicbot.commands.dj;
+package com.jagrosh.jmusicbot.commands.owner;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jmusicbot.Bot;
-import com.jagrosh.jmusicbot.commands.DJCommand;
+import com.jagrosh.jmusicbot.commands.OwnerCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
 
 /**
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class RepeatCmd extends DJCommand
+public class RepeatCmd extends OwnerCommand
 {
-    public RepeatCmd(Bot bot)
+    public RepeatCmd()
     {
-        super(bot);
+        super();
         this.name = "repeat";
         this.help = "re-adds music to the queue when finished";
         this.arguments = "[on|off]";
@@ -61,7 +60,4 @@ public class RepeatCmd extends DJCommand
         settings.setRepeatMode(value);
         event.replySuccess("Repeat mode is now `"+(value ? "ON" : "OFF")+"`");
     }
-
-    @Override
-    public void doCommand(CommandEvent event) { /* Intentionally Empty */ }
 }

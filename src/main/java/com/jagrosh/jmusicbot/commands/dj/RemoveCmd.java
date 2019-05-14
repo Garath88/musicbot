@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jagrosh.jmusicbot.commands.music;
+package com.jagrosh.jmusicbot.commands.dj;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
-import com.jagrosh.jmusicbot.commands.MusicCommand;
+import com.jagrosh.jmusicbot.commands.DJCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
+
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.User;
 
@@ -28,7 +29,7 @@ import net.dv8tion.jda.core.entities.User;
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class RemoveCmd extends MusicCommand 
+public class RemoveCmd extends DJCommand
 {
     public RemoveCmd(Bot bot)
     {
@@ -36,7 +37,7 @@ public class RemoveCmd extends MusicCommand
         this.name = "remove";
         this.help = "removes a song from the queue";
         this.arguments = "<position|ALL>";
-        this.aliases = new String[]{"delete"};
+        this.aliases = new String[]{"delete", "del", "r"};
         this.beListening = true;
         this.bePlaying = true;
     }

@@ -32,7 +32,7 @@ import com.jagrosh.jmusicbot.commands.admin.SettcCmd;
 import com.jagrosh.jmusicbot.commands.admin.SetvcCmd;
 import com.jagrosh.jmusicbot.commands.dj.ForceskipCmd;
 import com.jagrosh.jmusicbot.commands.dj.PauseCmd;
-import com.jagrosh.jmusicbot.commands.dj.RepeatCmd;
+import com.jagrosh.jmusicbot.commands.dj.RemoveCmd;
 import com.jagrosh.jmusicbot.commands.dj.SkiptoCmd;
 import com.jagrosh.jmusicbot.commands.dj.StopCmd;
 import com.jagrosh.jmusicbot.commands.dj.VolumeCmd;
@@ -43,18 +43,18 @@ import com.jagrosh.jmusicbot.commands.music.PlayCmd;
 import com.jagrosh.jmusicbot.commands.music.PlayLastCmd;
 import com.jagrosh.jmusicbot.commands.music.PlaylistsCmd;
 import com.jagrosh.jmusicbot.commands.music.QueueCmd;
-import com.jagrosh.jmusicbot.commands.music.RemoveCmd;
 import com.jagrosh.jmusicbot.commands.music.SCSearchCmd;
 import com.jagrosh.jmusicbot.commands.music.SearchCmd;
-import com.jagrosh.jmusicbot.commands.music.ShuffleCmd;
 import com.jagrosh.jmusicbot.commands.music.SkipCmd;
 import com.jagrosh.jmusicbot.commands.owner.AutoplaylistCmd;
 import com.jagrosh.jmusicbot.commands.owner.EvalCmd;
 import com.jagrosh.jmusicbot.commands.owner.PlaylistCmd;
+import com.jagrosh.jmusicbot.commands.owner.RepeatCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetavatarCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetgameCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetnameCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetstatusCmd;
+import com.jagrosh.jmusicbot.commands.owner.ShuffleCmd;
 import com.jagrosh.jmusicbot.commands.owner.ShutdownCmd;
 import com.jagrosh.jmusicbot.entities.Prompt;
 import com.jagrosh.jmusicbot.gui.GUI;
@@ -140,13 +140,13 @@ public class JMusicBot {
                 new RemoveCmd(bot),
                 new SearchCmd(bot, config.getSearching()),
                 new SCSearchCmd(bot, config.getSearching()),
-                new ShuffleCmd(bot),
+                new ShuffleCmd(),
                 new SkipCmd(bot),
 
                 new ForceskipCmd(bot),
                 new PauseCmd(bot),
                 new PlayCmd(bot, config.getLoading()),
-                new RepeatCmd(bot),
+                new RepeatCmd(),
                 new SkiptoCmd(bot),
                 new StopCmd(bot),
                 new VolumeCmd(bot),
