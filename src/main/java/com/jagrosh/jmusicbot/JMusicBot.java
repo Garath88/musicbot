@@ -132,35 +132,39 @@ public class JMusicBot {
                 new PingCommand(),
                 new SettingsCmd(),
 
+                //MUSIC
                 new LyricsCmd(bot),
                 new NowplayingCmd(bot),
+                new PlayCmd(bot, config.getLoading()),
                 new PlayLastCmd(bot, config.getLoading()),
                 new PlaylistsCmd(bot),
                 new QueueCmd(bot),
-                new RemoveCmd(bot),
                 new SearchCmd(bot, config.getSearching()),
                 new SCSearchCmd(bot, config.getSearching()),
-                new ShuffleCmd(),
                 new SkipCmd(bot),
-
-                new ForceskipCmd(bot),
-                new PauseCmd(bot),
-                new PlayCmd(bot, config.getLoading()),
-                new RepeatCmd(),
                 new SkiptoCmd(bot),
                 new StopCmd(bot),
                 new VolumeCmd(bot),
 
+                //DJ
+                new ForceskipCmd(bot),
+                new PauseCmd(bot),
+                new RemoveCmd(bot),
+
+                //Admin
                 new SetdjCmd(),
                 new SettcCmd(),
                 new SetvcCmd(),
 
+                //Owner
                 new AutoplaylistCmd(bot),
                 new PlaylistCmd(bot),
+                new RepeatCmd(),
                 new SetavatarCmd(),
                 new SetgameCmd(),
                 new SetnameCmd(),
                 new SetstatusCmd(),
+                new ShuffleCmd(),
                 new ShutdownCmd(bot)
             );
         if (config.useEval())
