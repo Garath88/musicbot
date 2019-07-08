@@ -20,44 +20,33 @@ import com.jagrosh.jmusicbot.commands.OwnerCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
 
 /**
- *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class RepeatCmd extends OwnerCommand
-{
-    public RepeatCmd()
-    {
+public class RepeatAllCmd extends OwnerCommand {
+    public RepeatAllCmd() {
         super();
-        this.name = "repeat";
+        this.name = "repeatall";
         this.help = "re-adds music to the queue when finished";
         this.arguments = "[on|off]";
         this.guildOnly = true;
     }
-    
+
     // override musiccommand's execute because we don't actually care where this is used
     @Override
-    protected void execute(CommandEvent event) 
-    {
+    protected void execute(CommandEvent event) {
         boolean value;
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
-        if(event.getArgs().isEmpty())
-        {
+        if (event.getArgs().isEmpty()) {
             value = !settings.getRepeatMode();
-        }
-        else if(event.getArgs().equalsIgnoreCase("true") || event.getArgs().equalsIgnoreCase("on"))
-        {
+        } else if (event.getArgs().equalsIgnoreCase("true") || event.getArgs().equalsIgnoreCase("on")) {
             value = true;
-        }
-        else if(event.getArgs().equalsIgnoreCase("false") || event.getArgs().equalsIgnoreCase("off"))
-        {
+        } else if (event.getArgs().equalsIgnoreCase("false") || event.getArgs().equalsIgnoreCase("off")) {
             value = false;
-        }
-        else
-        {
+        } else {
             event.replyError("Valid options are `on` or `off` (or leave empty to toggle)");
             return;
         }
         settings.setRepeatMode(value);
-        event.replySuccess("Repeat mode is now `"+(value ? "ON" : "OFF")+"`");
+        event.replySuccess("Repeat all mode is now `" + (value ? "ON" : "OFF") + "`");
     }
 }

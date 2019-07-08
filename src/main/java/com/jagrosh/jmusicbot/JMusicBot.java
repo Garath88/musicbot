@@ -33,6 +33,7 @@ import com.jagrosh.jmusicbot.commands.admin.SetvcCmd;
 import com.jagrosh.jmusicbot.commands.dj.ForceskipCmd;
 import com.jagrosh.jmusicbot.commands.dj.PauseCmd;
 import com.jagrosh.jmusicbot.commands.dj.RemoveCmd;
+import com.jagrosh.jmusicbot.commands.dj.Repeat;
 import com.jagrosh.jmusicbot.commands.dj.SkiptoCmd;
 import com.jagrosh.jmusicbot.commands.dj.StopCmd;
 import com.jagrosh.jmusicbot.commands.dj.VolumeCmd;
@@ -49,7 +50,7 @@ import com.jagrosh.jmusicbot.commands.music.SkipCmd;
 import com.jagrosh.jmusicbot.commands.owner.AutoplaylistCmd;
 import com.jagrosh.jmusicbot.commands.owner.EvalCmd;
 import com.jagrosh.jmusicbot.commands.owner.PlaylistCmd;
-import com.jagrosh.jmusicbot.commands.owner.RepeatCmd;
+import com.jagrosh.jmusicbot.commands.owner.RepeatAllCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetavatarCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetgameCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetnameCmd;
@@ -150,6 +151,7 @@ public class JMusicBot {
                 new ForceskipCmd(bot),
                 new PauseCmd(bot),
                 new RemoveCmd(bot),
+                new Repeat(bot),
 
                 //Admin
                 new SetdjCmd(),
@@ -159,7 +161,7 @@ public class JMusicBot {
                 //Owner
                 new AutoplaylistCmd(bot),
                 new PlaylistCmd(bot),
-                new RepeatCmd(),
+                new RepeatAllCmd(),
                 new SetavatarCmd(),
                 new SetgameCmd(),
                 new SetnameCmd(),

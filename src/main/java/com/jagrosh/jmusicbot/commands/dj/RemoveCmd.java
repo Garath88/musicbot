@@ -37,7 +37,7 @@ public class RemoveCmd extends DJCommand
         this.name = "remove";
         this.help = "removes a song from the queue";
         this.arguments = "<position|ALL>";
-        this.aliases = new String[]{"delete", "del", "r"};
+        this.aliases = new String[]{"delete", "del", "r", "rm"};
         this.beListening = true;
         this.bePlaying = true;
     }
