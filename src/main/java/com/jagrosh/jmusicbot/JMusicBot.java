@@ -41,11 +41,9 @@ import com.jagrosh.jmusicbot.commands.general.SettingsCmd;
 import com.jagrosh.jmusicbot.commands.music.LyricsCmd;
 import com.jagrosh.jmusicbot.commands.music.NowplayingCmd;
 import com.jagrosh.jmusicbot.commands.music.PlayCmd;
-import com.jagrosh.jmusicbot.commands.music.PlayLastCmd;
 import com.jagrosh.jmusicbot.commands.music.PlaylistsCmd;
 import com.jagrosh.jmusicbot.commands.music.QueueCmd;
 import com.jagrosh.jmusicbot.commands.music.SCSearchCmd;
-import com.jagrosh.jmusicbot.commands.music.SearchCmd;
 import com.jagrosh.jmusicbot.commands.music.SkipCmd;
 import com.jagrosh.jmusicbot.commands.owner.AutoplaylistCmd;
 import com.jagrosh.jmusicbot.commands.owner.EvalCmd;
@@ -136,11 +134,9 @@ public class JMusicBot {
                 //MUSIC
                 new LyricsCmd(bot),
                 new NowplayingCmd(bot),
-                new PlayCmd(bot, config.getLoading()),
-                new PlayLastCmd(bot, config.getLoading()),
+                new PlayCmd(bot, config.getLoading(), config.getSearching()),
                 new PlaylistsCmd(bot),
                 new QueueCmd(bot),
-                new SearchCmd(bot, config.getSearching()),
                 new SCSearchCmd(bot, config.getSearching()),
                 new SkipCmd(bot),
                 new SkiptoCmd(bot),

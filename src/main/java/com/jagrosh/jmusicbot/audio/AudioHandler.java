@@ -65,18 +65,8 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             audioPlayer.playTrack(qtrack.getTrack());
             return 0;
         } else {
-            boolean alreadyExists = false;
-            String queuedTrack = qtrack.getTrack().getIdentifier();
-            if (audioPlayer.getPlayingTrack().getIdentifier().equals(queuedTrack)) {
-                alreadyExists = true;
-            } else {
-                for (int i = 0; i < queue.size(); i++) {
-                    if (queue.get(i).getTrack().getIdentifier().equals(queuedTrack)) {
-                        alreadyExists = true;
-                    }
-                }
-            }
-            if (!alreadyExists) {
+            String track = qtrack.getTrack().getIdentifier();
+            if (!trackAlreadyExistsInQueue(track)) {
                 queue.addAt(0, qtrack);
                 return 1;
             } else {
@@ -88,9 +78,29 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     public int addTrack(QueuedTrack qtrack) {
         if (audioPlayer.getPlayingTrack() == null) {
             audioPlayer.playTrack(qtrack.getTrack());
-            return -1;
-        } else
-            return queue.add(qtrack);
+            return 0;
+        } else {
+            String track = qtrack.getTrack().getIdentifier();
+            if (!trackAlreadyExistsInQueue(track)) {
+                return queue.add(qtrack) + 1;
+            } else {
+                return -1;
+            }
+        }
+    }
+
+    private boolean trackAlreadyExistsInQueue(String track) {
+        boolean alreadyExists = false;
+        if (audioPlayer.getPlayingTrack().getIdentifier().equals(track)) {
+            alreadyExists = true;
+        } else {
+            for (int i = 0; i < queue.size(); i++) {
+                if (queue.get(i).getTrack().getIdentifier().equals(track)) {
+                    alreadyExists = true;
+                }
+            }
+        }
+        return alreadyExists;
     }
 
     public FairQueue<QueuedTrack> getQueue() {

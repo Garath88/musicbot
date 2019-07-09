@@ -16,10 +16,13 @@
 package com.jagrosh.jmusicbot.commands.music;
 
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.menu.ButtonMenu;
+import com.jagrosh.jdautilities.menu.OrderedMenu;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
@@ -46,10 +49,15 @@ public class PlayCmd extends MusicCommand {
     private final static String CANCEL = "\uD83D\uDEAB"; // 🚫
 
     private final String loadingEmoji;
+    private final String searchingEmoji;
+    protected String searchPrefix = "ytsearch:";
+    private final OrderedMenu.Builder builder;
+    private final Pattern ytPlaylistPattern = Pattern.compile("^.*(youtu.be\\/|list=)([^#\\&\\?]*).*");
 
-    public PlayCmd(Bot bot, String loadingEmoji) {
+    public PlayCmd(Bot bot, String loadingEmoji, String searchingEmoji) {
         super(bot);
         this.loadingEmoji = loadingEmoji;
+        this.searchingEmoji = searchingEmoji;
         this.name = "play";
         this.aliases = new String[] { "p" };
         this.arguments = "<title|URL|subcommand>";
@@ -57,6 +65,14 @@ public class PlayCmd extends MusicCommand {
         this.beListening = true;
         this.bePlaying = false;
         this.children = new Command[] { new PlaylistCmd(bot) };
+        this.botPermissions = new Permission[] { Permission.MESSAGE_EMBED_LINKS };
+        builder = new OrderedMenu.Builder()
+            .allowTextInput(true)
+            .useNumbers()
+            .useCancelButton(true)
+            .setEventWaiter(bot.getWaiter())
+            .setTimeout(1, TimeUnit.MINUTES);
+
     }
 
     @Override
@@ -87,21 +103,29 @@ public class PlayCmd extends MusicCommand {
             event.reply(builder.toString());
             return;
         }
-        String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">")
-            ? event.getArgs().substring(1, event.getArgs().length() - 1)
-            : event.getArgs().isEmpty() ? event.getMessage().getAttachments().get(0).getUrl() : event.getArgs();
-        event.reply(loadingEmoji + " Loading... `[" + args + "]`", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m, event, false)));
+
+        String args = event.getArgs();
+        Matcher playlistFinder = ytPlaylistPattern.matcher(args);
+
+        if (playlistFinder.matches()) {
+            event.reply(loadingEmoji + " Loading... `[" + args + "]`", m -> bot.getPlayerManager().loadItemOrdered(
+                event.getGuild(), playlistFinder.group(2), new ResultHandler(m, event)));
+        } else if (args.contains("http")) {
+            event.reply(loadingEmoji + " Loading... `[" + args + "]`", m -> bot.getPlayerManager().loadItemOrdered(
+                event.getGuild(), args, new ResultHandler(m, event)));
+        } else {
+            event.reply(searchingEmoji + " Searching... `[" + event.getArgs() + "]`",
+                m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), searchPrefix + event.getArgs(), new ResultHandler(m, event)));
+        }
     }
 
     private class ResultHandler implements AudioLoadResultHandler {
         private final Message m;
         private final CommandEvent event;
-        private final boolean ytsearch;
 
-        private ResultHandler(Message m, CommandEvent event, boolean ytsearch) {
+        private ResultHandler(Message m, CommandEvent event) {
             this.m = m;
             this.event = event;
-            this.ytsearch = ytsearch;
         }
 
         private void loadSingle(AudioTrack track, AudioPlaylist playlist) {
@@ -161,12 +185,39 @@ public class PlayCmd extends MusicCommand {
 
         @Override
         public void playlistLoaded(AudioPlaylist playlist) {
+
             if (playlist.getTracks().size() == 1 || playlist.isSearchResult()) {
-                AudioTrack single = playlist.getSelectedTrack() == null ? playlist.getTracks().get(0) : playlist.getSelectedTrack();
-                loadSingle(single, null);
-            } else if (playlist.getSelectedTrack() != null) {
-                AudioTrack single = playlist.getSelectedTrack();
-                loadSingle(single, playlist);
+                builder.setColor(event.getSelfMember().getColor())
+                    .setText(FormatUtil.filter(event.getClient().getSuccess() + " Search results for `" + event.getArgs() + "`:"))
+                    .setChoices(new String[0])
+                    .setSelection((msg, i) ->
+                    {
+                        AudioTrack track = playlist.getTracks().get(i - 1);
+                        if (bot.getConfig().isTooLong(track)) {
+                            event.replyWarning("This track (**" + track.getInfo().title + "**) is longer than the allowed maximum: `"
+                                + FormatUtil.formatTime(track.getDuration()) + "` > `" + bot.getConfig().getMaxTime() + "`");
+                            return;
+                        }
+                        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+                        int pos = handler.addTrackToFront(new QueuedTrack(track, event.getAuthor()));
+                        if (pos >= 0) {
+                            event.replySuccess("Added **" + track.getInfo().title
+                                + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "to begin playing"
+                                : " to the queue at position " + pos));
+                        } else {
+                            event.reply("Duplicate track, not added");
+                        }
+
+                    })
+                    .setCancel((msg) -> {
+                    })
+                    .setUsers(event.getAuthor())
+                ;
+                for (int i = 0; i < 4 && i < playlist.getTracks().size(); i++) {
+                    AudioTrack track = playlist.getTracks().get(i);
+                    builder.addChoices("`[" + FormatUtil.formatTime(track.getDuration()) + "]` [**" + track.getInfo().title + "**](" + track.getInfo().uri + ")");
+                }
+                builder.build().display(m);
             } else {
                 int count = loadPlaylist(playlist, null);
                 if (count == 0) {
@@ -180,14 +231,12 @@ public class PlayCmd extends MusicCommand {
                         + bot.getConfig().getMaxTime() + "`) have been omitted." : ""))).queue();
                 }
             }
+
         }
 
         @Override
         public void noMatches() {
-            if (ytsearch)
-                m.editMessage(FormatUtil.filter(event.getClient().getWarning() + " No results found for `" + event.getArgs() + "`.")).queue();
-            else
-                bot.getPlayerManager().loadItemOrdered(event.getGuild(), "ytsearch:" + event.getArgs(), new ResultHandler(m, event, true));
+            m.editMessage(FormatUtil.filter(event.getClient().getWarning() + " No results found for `" + event.getArgs() + "`.")).queue();
         }
 
         @Override
