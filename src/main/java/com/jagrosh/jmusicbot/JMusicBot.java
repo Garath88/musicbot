@@ -47,6 +47,7 @@ import com.jagrosh.jmusicbot.commands.music.SCSearchCmd;
 import com.jagrosh.jmusicbot.commands.music.SkipCmd;
 import com.jagrosh.jmusicbot.commands.owner.AutoplaylistCmd;
 import com.jagrosh.jmusicbot.commands.owner.EvalCmd;
+import com.jagrosh.jmusicbot.commands.owner.ExportCmd;
 import com.jagrosh.jmusicbot.commands.owner.PlaylistCmd;
 import com.jagrosh.jmusicbot.commands.owner.RepeatAllCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetavatarCmd;
@@ -127,7 +128,7 @@ public class JMusicBot {
             .setHelpWord(config.getHelp())
             .setLinkedCacheSize(200)
             .setGuildSettingsManager(settings)
-            .addCommands(aboutCommand,
+            .addCommands(
                 new PingCommand(),
                 new SettingsCmd(),
 
@@ -163,7 +164,8 @@ public class JMusicBot {
                 new SetnameCmd(),
                 new SetstatusCmd(),
                 new ShuffleCmd(),
-                new ShutdownCmd(bot)
+                new ShutdownCmd(bot),
+                new ExportCmd(bot)
             );
         if (config.useEval())
             cb.addCommand(new EvalCmd(bot));

@@ -15,6 +15,7 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +53,8 @@ public class PlayCmd extends MusicCommand {
     private final String searchingEmoji;
     protected String searchPrefix = "ytsearch:";
     private final OrderedMenu.Builder builder;
-    private final Pattern ytPlaylistPattern = Pattern.compile("^.*(youtu.be\\/|list=)([^#\\&\\?]*).*");
+    private final Pattern ytPlaylistPattern = Pattern.compile(
+        "(?:http|https|)(?::\\/\\/|)(?:www.|)(?:youtu\\.be\\/|youtube\\.com(?:\\/embed\\/|\\/v\\/|\\/watch\\?v=|\\/ytscreeningroom\\?v=|\\/feeds\\/api\\/videos\\/|\\/user\\S*[^\\w\\-\\s]|\\S*[^\\w\\-\\s]))([\\w\\-]{12,})[a-z0-9;:@#?&%=+\\/\\$_.-]*");
 
     public PlayCmd(Bot bot, String loadingEmoji, String searchingEmoji) {
         super(bot);
@@ -106,10 +108,9 @@ public class PlayCmd extends MusicCommand {
 
         String args = event.getArgs();
         Matcher playlistFinder = ytPlaylistPattern.matcher(args);
-
         if (playlistFinder.matches()) {
             event.reply(loadingEmoji + " Loading... `[" + args + "]`", m -> bot.getPlayerManager().loadItemOrdered(
-                event.getGuild(), playlistFinder.group(2), new ResultHandler(m, event)));
+                event.getGuild(), playlistFinder.group(1), new ResultHandler(m, event)));
         } else if (args.contains("http")) {
             event.reply(loadingEmoji + " Loading... `[" + args + "]`", m -> bot.getPlayerManager().loadItemOrdered(
                 event.getGuild(), args, new ResultHandler(m, event)));
@@ -273,7 +274,8 @@ public class PlayCmd extends MusicCommand {
             event.getChannel().sendMessage(loadingEmoji + " Loading playlist **" + event.getArgs() + "**... (" + playlist.getItems().size() + " items)").queue(m ->
             {
                 AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-                playlist.loadTracks(bot.getPlayerManager(), (at) -> handler.addTrack(new QueuedTrack(at, event.getAuthor())), () -> {
+                Iterator<Long> authors = playlist.getAuthorList().iterator();
+                playlist.loadTracks(bot.getPlayerManager(), (at) -> handler.addTrack(new QueuedTrack(at, authors.next())), () -> {
                     StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty()
                         ? event.getClient().getWarning() + " No tracks were loaded!"
                         : event.getClient().getSuccess() + " Loaded **" + playlist.getTracks().size() + "** tracks!");
