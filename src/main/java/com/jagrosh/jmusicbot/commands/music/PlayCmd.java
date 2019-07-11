@@ -172,8 +172,9 @@ public class PlayCmd extends MusicCommand {
             playlist.getTracks().stream().forEach((track) -> {
                 if (!bot.getConfig().isTooLong(track) && !track.equals(exclude)) {
                     AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-                    handler.addTrack(new QueuedTrack(track, event.getAuthor()));
-                    count[0]++;
+                    if (handler.addTrackAt(new QueuedTrack(track, event.getAuthor()), count[0]) != -1) {
+                        count[0]++;
+                    }
                 }
             });
             return count[0];
@@ -186,7 +187,6 @@ public class PlayCmd extends MusicCommand {
 
         @Override
         public void playlistLoaded(AudioPlaylist playlist) {
-
             if (playlist.getTracks().size() == 1 || playlist.isSearchResult()) {
                 builder.setColor(event.getSelfMember().getColor())
                     .setText(FormatUtil.filter(event.getClient().getSuccess() + " Search results for `" + event.getArgs() + "`:"))
@@ -222,8 +222,11 @@ public class PlayCmd extends MusicCommand {
             } else {
                 int count = loadPlaylist(playlist, null);
                 if (count == 0) {
+                    m.editMessage(event.getClient().getError() + " No entries in this playlist were added").queue();
+                    /*
                     m.editMessage(FormatUtil.filter(event.getClient().getWarning() + " All entries in this playlist " + (playlist.getName() == null ? "" : "(**" + playlist.getName()
                         + "**) ") + "were longer than the allowed maximum (`" + bot.getConfig().getMaxTime() + "`)")).queue();
+                     */
                 } else {
                     m.editMessage(FormatUtil.filter(event.getClient().getSuccess() + " Found "
                         + (playlist.getName() == null ? "a playlist" : "playlist **" + playlist.getName() + "**") + " with `"
@@ -275,10 +278,15 @@ public class PlayCmd extends MusicCommand {
             {
                 AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
                 Iterator<Long> authors = playlist.getAuthorList().iterator();
-                playlist.loadTracks(bot.getPlayerManager(), (at) -> handler.addTrack(new QueuedTrack(at, authors.next())), () -> {
+                int[] count = { 0 };
+                playlist.loadTracks(bot.getPlayerManager(), (at) -> {
+                    if (handler.addTrackAt(new QueuedTrack(at, authors.next()), count[0]) != -1) {
+                        count[0]++;
+                    }
+                }, () -> {
                     StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty()
                         ? event.getClient().getWarning() + " No tracks were loaded!"
-                        : event.getClient().getSuccess() + " Loaded **" + playlist.getTracks().size() + "** tracks!");
+                        : event.getClient().getSuccess() + " Loaded **" + count[0] + "** tracks!");
                     if (!playlist.getErrors().isEmpty())
                         builder.append("\nThe following tracks failed to load:");
                     playlist.getErrors().forEach(err -> builder.append("\n`[").append(err.getIndex() + 1).append("]` **").append(err.getItem()).append("**: ").append(err.getReason()));

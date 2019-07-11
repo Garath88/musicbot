@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.collect.ImmutableList;
 import com.jagrosh.jmusicbot.BotConfig;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -235,7 +236,9 @@ public class PlaylistLoader {
         }
 
         public List<Long> getAuthorList() {
-            return authors;
+            ImmutableList<Long> copy = ImmutableList.copyOf(authors);
+            authors.clear();
+            return copy;
         }
     }
 

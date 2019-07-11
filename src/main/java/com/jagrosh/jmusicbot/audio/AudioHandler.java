@@ -75,7 +75,22 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         }
     }
 
-    public int addTrack(QueuedTrack qtrack) {
+    public int addTrackAt(QueuedTrack qtrack, int index) {
+        if (audioPlayer.getPlayingTrack() == null) {
+            audioPlayer.playTrack(qtrack.getTrack());
+            return 0;
+        } else {
+            String track = qtrack.getTrack().getIdentifier();
+            if (!trackAlreadyExistsInQueue(track)) {
+                queue.addAt(index, qtrack);
+                return 1;
+            } else {
+                return -1;
+            }
+        }
+    }
+
+    public int addTrackFairly(QueuedTrack qtrack) {
         if (audioPlayer.getPlayingTrack() == null) {
             audioPlayer.playTrack(qtrack.getTrack());
             return 0;

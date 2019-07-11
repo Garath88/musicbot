@@ -110,7 +110,7 @@ public class PlayLastCmd extends MusicCommand {
                 return;
             }
             AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-            int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor()));
+            int pos = handler.addTrackFairly(new QueuedTrack(track, event.getAuthor()));
             String trackMsg = "";
 
             final String addMsg;
@@ -155,7 +155,7 @@ public class PlayLastCmd extends MusicCommand {
             playlist.getTracks().stream().forEach((track) -> {
                 if (!bot.getConfig().isTooLong(track) && !track.equals(exclude)) {
                     AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-                    handler.addTrack(new QueuedTrack(track, event.getAuthor()));
+                    handler.addTrackFairly(new QueuedTrack(track, event.getAuthor()));
                     count[0]++;
                 }
             });
@@ -232,7 +232,7 @@ public class PlayLastCmd extends MusicCommand {
             event.getChannel().sendMessage(loadingEmoji + " Loading playlist **" + event.getArgs() + "**... (" + playlist.getItems().size() + " items)").queue(m ->
             {
                 AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-                playlist.loadTracks(bot.getPlayerManager(), (at) -> handler.addTrack(new QueuedTrack(at, event.getAuthor())), () -> {
+                playlist.loadTracks(bot.getPlayerManager(), (at) -> handler.addTrackFairly(new QueuedTrack(at, event.getAuthor())), () -> {
                     StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty()
                         ? event.getClient().getWarning() + " No tracks were loaded!"
                         : event.getClient().getSuccess() + " Loaded **" + playlist.getTracks().size() + "** tracks!");

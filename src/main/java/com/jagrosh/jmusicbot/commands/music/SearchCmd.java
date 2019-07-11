@@ -86,7 +86,7 @@ public class SearchCmd extends MusicCommand {
                 return;
             }
             AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-            int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor())) + 1;
+            int pos = handler.addTrackFairly(new QueuedTrack(track, event.getAuthor())) + 1;
             m.editMessage(FormatUtil.filter(event.getClient().getSuccess() + " Added **" + track.getInfo().title
                 + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "to begin playing"
                 : " to the queue at position " + pos))).queue();
