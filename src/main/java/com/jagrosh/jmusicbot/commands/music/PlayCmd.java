@@ -280,7 +280,11 @@ public class PlayCmd extends MusicCommand {
                 Iterator<Long> authors = playlist.getAuthorList().iterator();
                 int[] count = { 0 };
                 playlist.loadTracks(bot.getPlayerManager(), (at) -> {
-                    if (handler.addTrackAt(new QueuedTrack(at, authors.next()), count[0]) != -1) {
+                    Long author = event.getAuthor().getIdLong();
+                    if (authors.hasNext()) {
+                        author = authors.next();
+                    }
+                    if (handler.addTrackAt(new QueuedTrack(at, author), count[0]) != -1) {
                         count[0]++;
                     }
                 }, () -> {
