@@ -55,7 +55,11 @@ public class SkipCmd extends MusicCommand {
             int skippers = (int)event.getSelfMember().getVoiceState().getChannel().getMembers().stream()
                 .filter(m -> handler.getVotes().contains(m.getUser().getId())).count();
             int required = (int)Math.floor(listeners * .55);
-            msg += skippers + " votes, " + skippers + "/" + required + " votes needed]`";
+            if (required > 0) {
+                msg += skippers + " votes, " + skippers + "/" + required + " votes needed]`";
+            } else {
+                msg += "1 votes, no further votes needed]`";
+            }
             if (skippers >= required) {
                 User u = event.getJDA().getUserById(handler.getRequester());
                 msg += "\n" + event.getClient().getSuccess() + " Skipped **" + handler.getPlayer().getPlayingTrack().getInfo().title
