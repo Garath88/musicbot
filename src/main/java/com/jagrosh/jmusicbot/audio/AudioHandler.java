@@ -65,8 +65,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             audioPlayer.playTrack(qtrack.getTrack());
             return 0;
         } else {
-            String track = qtrack.getTrack().getIdentifier();
-            if (!trackAlreadyExistsInQueue(track)) {
+            if (!trackAlreadyExistsInQueue(qtrack)) {
                 queue.addAt(0, qtrack);
                 return 1;
             } else {
@@ -80,8 +79,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             audioPlayer.playTrack(qtrack.getTrack());
             return 0;
         } else {
-            String track = qtrack.getTrack().getIdentifier();
-            if (!trackAlreadyExistsInQueue(track)) {
+            if (!trackAlreadyExistsInQueue(qtrack)) {
                 queue.addAt(index, qtrack);
                 return 1;
             } else {
@@ -95,8 +93,8 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             audioPlayer.playTrack(qtrack.getTrack());
             return 0;
         } else {
-            String track = qtrack.getTrack().getIdentifier();
-            if (!trackAlreadyExistsInQueue(track)) {
+
+            if (!trackAlreadyExistsInQueue(qtrack)) {
                 return queue.add(qtrack) + 1;
             } else {
                 return -1;
@@ -104,14 +102,16 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         }
     }
 
-    private boolean trackAlreadyExistsInQueue(String track) {
+    private boolean trackAlreadyExistsInQueue(QueuedTrack qtrack) {
+        String track = qtrack.getTrack().getIdentifier();
         boolean alreadyExists = false;
         if (audioPlayer.getPlayingTrack().getIdentifier().equals(track)) {
             alreadyExists = true;
         } else {
             for (int i = 0; i < queue.size(); i++) {
                 if (queue.get(i).getTrack().getIdentifier().equals(track)) {
-                    alreadyExists = true;
+                    //alreadyExists = true;
+                    queue.remove(i);
                 }
             }
         }
