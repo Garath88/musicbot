@@ -13,24 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jagrosh.jmusicbot.commands.owner;
+package com.jagrosh.jmusicbot.commands.music;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
-import com.jagrosh.jmusicbot.commands.OwnerCommand;
+import com.jagrosh.jmusicbot.commands.MusicCommand;
 
 /**
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class ShuffleCmd extends OwnerCommand {
-    public ShuffleCmd() {
-        super();
+public class ShuffleCmd extends MusicCommand {
+    public ShuffleCmd(Bot bot) {
+        super(bot);
         this.name = "shuffle";
         this.help = "shuffles songs you have added";
+        this.beListening = true;
+        this.bePlaying = true;
     }
 
     @Override
-    protected void execute(CommandEvent event) {
+    public void doCommand(CommandEvent event) {
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
         int s = handler.getQueue().shuffle(event.getAuthor().getIdLong());
         switch (s) {
@@ -45,4 +48,5 @@ public class ShuffleCmd extends OwnerCommand {
                 break;
         }
     }
+
 }

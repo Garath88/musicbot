@@ -45,6 +45,7 @@ import com.jagrosh.jmusicbot.commands.music.QueueCmd;
 import com.jagrosh.jmusicbot.commands.music.RemoveCmd;
 import com.jagrosh.jmusicbot.commands.music.RemoveLastCmd;
 import com.jagrosh.jmusicbot.commands.music.SCSearchCmd;
+import com.jagrosh.jmusicbot.commands.music.ShuffleCmd;
 import com.jagrosh.jmusicbot.commands.music.SkipCmd;
 import com.jagrosh.jmusicbot.commands.owner.AutoplaylistCmd;
 import com.jagrosh.jmusicbot.commands.owner.EvalCmd;
@@ -55,7 +56,6 @@ import com.jagrosh.jmusicbot.commands.owner.SetavatarCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetgameCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetnameCmd;
 import com.jagrosh.jmusicbot.commands.owner.SetstatusCmd;
-import com.jagrosh.jmusicbot.commands.owner.ShuffleCmd;
 import com.jagrosh.jmusicbot.commands.owner.ShutdownCmd;
 import com.jagrosh.jmusicbot.entities.Prompt;
 import com.jagrosh.jmusicbot.gui.GUI;
@@ -165,7 +165,7 @@ public class JMusicBot {
                 new SetgameCmd(),
                 new SetnameCmd(),
                 new SetstatusCmd(),
-                new ShuffleCmd(),
+                new ShuffleCmd(bot),
                 new ShutdownCmd(bot),
                 new ExportCmd(bot)
             );
