@@ -62,12 +62,13 @@ import com.jagrosh.jmusicbot.gui.GUI;
 import com.jagrosh.jmusicbot.settings.SettingsManager;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 /**
  * @author John Grosh (jagrosh)
@@ -177,10 +178,10 @@ public class JMusicBot {
         if (config.getGame() == null)
             cb.useDefaultGame();
         else if (config.getGame().getName().equalsIgnoreCase("none")) {
-            cb.setGame(null);
+            cb.setActivity(null);
             nogame = true;
         } else
-            cb.setGame(config.getGame());
+            cb.setActivity(config.getGame());
         CommandClient client = cb.build();
 
         if (!prompt.isNoGUI()) {
@@ -199,12 +200,12 @@ public class JMusicBot {
 
         // attempt to log in and start
         try {
-            JDA jda = new JDABuilder(AccountType.BOT)
-                .setToken(config.getToken())
-                .setAudioEnabled(true)
-                .setGame(nogame ? null : Game.playing("loading..."))
+            JDA jda = JDABuilder.create(config.getToken(), GatewayIntent.getIntents(GatewayIntent.ALL_INTENTS))
+                .setMemberCachePolicy(MemberCachePolicy.ALL)
+                .setStatus(OnlineStatus.DO_NOT_DISTURB)
+                .setActivity(nogame ? null : Activity.playing("loading..."))
                 .setStatus(config.getStatus() == OnlineStatus.INVISIBLE || config.getStatus() == OnlineStatus.OFFLINE ? OnlineStatus.INVISIBLE : OnlineStatus.DO_NOT_DISTURB)
-                .addEventListener(client, waiter, new Listener(bot))
+                .addEventListeners(client, waiter, new Listener(bot))
                 .setBulkDeleteSplittingEnabled(true)
                 .build();
             bot.setJDA(jda);

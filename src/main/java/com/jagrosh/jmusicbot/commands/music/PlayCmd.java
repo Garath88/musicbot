@@ -15,7 +15,6 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,10 +36,10 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.exceptions.PermissionException;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 
 /**
  * @author John Grosh <john.a.grosh@gmail.com>
@@ -150,7 +149,7 @@ public class PlayCmd extends MusicCommand {
                     .setText(addMsg + "\n" + event.getClient().getWarning() + " This track has a playlist of **" + playlist.getTracks().size() + "** tracks attached. Select " + LOAD + " to load playlist.")
                     .setChoices(LOAD, CANCEL)
                     .setEventWaiter(bot.getWaiter())
-                    .setTimeout(30, TimeUnit.SECONDS)
+                    .setTimeout(60, TimeUnit.SECONDS)
                     .setAction(re ->
                     {
                         if (re.getName().equals(LOAD))
@@ -277,14 +276,9 @@ public class PlayCmd extends MusicCommand {
             event.getChannel().sendMessage(loadingEmoji + " Loading playlist **" + event.getArgs() + "**... (" + playlist.getItems().size() + " items)").queue(m ->
             {
                 AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-                Iterator<Long> authors = playlist.getAuthorList().iterator();
                 int[] count = { 0 };
                 playlist.loadTracks(bot.getPlayerManager(), (at) -> {
-                    Long author = event.getAuthor().getIdLong();
-                    if (authors.hasNext()) {
-                        author = authors.next();
-                    }
-                    if (handler.addTrackAt(new QueuedTrack(at, author), count[0]) != -1) {
+                    if (handler.addTrackAt(new QueuedTrack(at), count[0]) != -1) {
                         count[0]++;
                     }
                 }, () -> {

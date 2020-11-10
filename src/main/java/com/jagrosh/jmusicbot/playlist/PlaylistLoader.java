@@ -83,6 +83,7 @@ public class PlaylistLoader {
     }
 
     public Playlist getPlaylist(String name) {
+        authors.clear();
         if (!getPlaylistNames().contains(name))
             return null;
         try {
@@ -131,6 +132,7 @@ public class PlaylistLoader {
         private final List<AudioTrack> tracks = new LinkedList<>();
         private final List<PlaylistLoadError> errors = new LinkedList<>();
         private boolean loaded = false;
+        private int authorCounter = 0;
 
         private Playlist(String name, List<String> items, boolean shuffle) {
             this.name = name;
@@ -150,7 +152,7 @@ public class PlaylistLoader {
                             if (config.isTooLong(at))
                                 errors.add(new PlaylistLoadError(index, items.get(index), "This track is longer than the allowed maximum"));
                             else {
-                                at.setUserData(0L);
+                                at.setUserData(getNextAuthor());
                                 tracks.add(at);
                                 consumer.accept(at);
                             }
@@ -164,7 +166,7 @@ public class PlaylistLoader {
                                 if (config.isTooLong(ap.getTracks().get(0)))
                                     errors.add(new PlaylistLoadError(index, items.get(index), "This track is longer than the allowed maximum"));
                                 else {
-                                    ap.getTracks().get(0).setUserData(0L);
+                                    ap.getTracks().get(0).setUserData(getNextAuthor());
                                     tracks.add(ap.getTracks().get(0));
                                     consumer.accept(ap.getTracks().get(0));
                                 }
@@ -172,7 +174,7 @@ public class PlaylistLoader {
                                 if (config.isTooLong(ap.getSelectedTrack()))
                                     errors.add(new PlaylistLoadError(index, items.get(index), "This track is longer than the allowed maximum"));
                                 else {
-                                    ap.getSelectedTrack().setUserData(0L);
+                                    ap.getSelectedTrack().setUserData(getNextAuthor());
                                     tracks.add(ap.getSelectedTrack());
                                     consumer.accept(ap.getSelectedTrack());
                                 }
@@ -197,6 +199,7 @@ public class PlaylistLoader {
                         @Override
                         public void noMatches() {
                             errors.add(new PlaylistLoadError(index, items.get(index), "No matches found."));
+                            getNextAuthor();
                             if (last && callback != null)
                                 callback.run();
                         }
@@ -204,6 +207,7 @@ public class PlaylistLoader {
                         @Override
                         public void loadFailed(FriendlyException fe) {
                             errors.add(new PlaylistLoadError(index, items.get(index), "Failed to load track: " + fe.getLocalizedMessage()));
+                            getNextAuthor();
                             if (last && callback != null)
                                 callback.run();
                         }
@@ -235,10 +239,12 @@ public class PlaylistLoader {
             return errors;
         }
 
-        public List<Long> getAuthorList() {
-            ImmutableList<Long> copy = ImmutableList.copyOf(authors);
-            authors.clear();
-            return copy;
+        private Long getNextAuthor() {
+            if (authors.isEmpty()) {
+                return 0L;
+            } else {
+                return authors.get(authorCounter++);
+            }
         }
     }
 
